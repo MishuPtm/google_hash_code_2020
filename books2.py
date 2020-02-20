@@ -76,9 +76,9 @@ def write_file(file, list_of_signed_up):
 def process(file):
     book_scores, days_to_ship, list_of_libraries = read_file(file)
     # print(book_scores)
-    list_of_libraries.sort(key=lambda x: x.sort, reverse=False)
+    list_of_libraries.sort(key=lambda x: x.sort, reverse=True)
     list_of_signed_up = []
-    global_list_books = []
+    global_set_books = set()
     for library in list_of_libraries:
         ind = 0
         if days_to_ship > library.days_to_signup:
@@ -92,19 +92,20 @@ def process(file):
                     if len(library.books_to_scan) == len(library.list_of_books):
                         break
 
-                    # if library.list_of_books[ind + x] in global_list_books:
-                    #     if ind < len(library.list_of_books) - 2:
-                    #         ind += 1
-
+                    while library.list_of_books[ind + x] in global_set_books:
+                        if ind < len(library.list_of_books) - library.speed - 2:
+                            # print("Book already scanned")
+                            ind += 1
+                        else:
+                            break
                     library.books_to_scan.append(library.list_of_books[ind + x])
-
+                    global_set_books.add(library.list_of_books[ind + x])
                 if ind < len(library.list_of_books) - 1:
                     ind += library.speed
                 else:
                     break
                 if len(library.books_to_scan) == len(library.list_of_books):
                     break
-        global_list_books += library.books_to_scan
 
         #print(library.list_of_books)
         #print(f"Books to scan from {library.id}: {library.books_to_scan}")
