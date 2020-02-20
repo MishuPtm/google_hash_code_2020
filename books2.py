@@ -111,6 +111,7 @@ def process(file):
         #print(f"Books to scan from {library.id}: {library.books_to_scan}")
     write_file(file, list_of_signed_up)
 
+
 tic = time.perf_counter()
 # process(file_names[0])
 for file in file_names:
