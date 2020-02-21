@@ -37,18 +37,26 @@ class Library:
             output.append(item[1])
         return output
 
+    def get_time_required(self):
+        # print(f"{self.speed}, {len(self.list_of_books)}")
+        shipments_required = len(self.list_of_books) / self.speed
+        return self.days_to_signup + shipments_required
+
+
     def __str__(self):
         return f"Nb of books: {self.nb_of_books} | " \
                f"Days to signup: {self.days_to_signup} | " \
                f"Books shipped per day: {self.speed} | " \
                f"Library id: {self.id} | " \
-               f"List of books: {self.list_of_books} | " \
+               f"NB of books: {self.nb_of_books} | " \
                f""
 
     @property
     def sort(self):
-        return self.days_to_signup / self.speed
-        # return self.total_score / len(self.list_of_books)
+        average = self.total_score / len(self.list_of_books)
+        # print(average)
+        return (self.days_to_signup / self.speed) / self.total_score
+        # return self.total_score
 
 def read_file(file):
     with open(file, "r") as f:
@@ -75,6 +83,7 @@ def read_file(file):
 
             list_of_library.append(library)
             index += 2
+    print(f"{time.time()} {file} read")
     return books_score, days_to_ship, list_of_library
 
 
@@ -91,12 +100,14 @@ def write_file(file, list_of_signed_up):
 
     with open(file.replace("txt", "out3"), "w")as f:
         f.write(output)
-    print(f"{file} processed")
+    print(f"{time.time()} {file} processed")
 
 
 def process(file):
     Library.book_scores, Library.days_left, Library.list_of_libraries = read_file(file)
     Library.list_of_libraries.sort(key=lambda c: c.sort, reverse=False)  # Sorting libraries to start with better ones
+    # print(f"{file} sorted")
+    Library.global_books = set()
     list_of_signed_up = []
     for library_obj in Library.list_of_libraries:
         if Library.days_left > library_obj.days_to_signup:
@@ -107,23 +118,35 @@ def process(file):
                 for x in range(library_obj.speed):  # Adding x books in every shipment
                     if len(ordered_books) > 0:
                         current_book = ordered_books.pop()
-                        # while len(ordered_books) > 0 and current_book in Library.global_books:
-                        #     current_book = ordered_books.pop()
-                        library_obj.books_to_scan.append(current_book)
+                        while current_book in Library.global_books:
+                            if len(ordered_books) > 0:
+                                current_book = ordered_books.pop()
+                            else:
+                                break
                         Library.global_books.add(current_book)
+                        library_obj.books_to_scan.append(current_book)
                     else:
                         break
                 if len(ordered_books) == 0:
                     break
-
+        if file == "b_read_on.txt":
+            print(f"Days left: {Library.days_left}\t"
+                  f"Current library {library_obj.days_to_signup}\t"
+                  f"Time required for entire library {library_obj.get_time_required()}")
+            pass
+    print(f"{time.time()} finished computing{file}")
     write_file(file, list_of_signed_up)
 
 
-tic = time.perf_counter()
 if __name__ == "__main__":
+    tic = time.perf_counter()
+    from test import main as t
+    from test import test_file
     for file in file_names:
         process(file)
-    from test import main as test
-    test("out3")
-toc = time.perf_counter()
-print(f"Finished in {toc-tic}")
+    # process("test.txt")
+    # test_file("test.out3")
+
+    toc = time.perf_counter()
+    print(f"Finished in {toc-tic}")
+    t("out3")
