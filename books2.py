@@ -31,7 +31,6 @@ class Library:
         return self.days_to_signup / self.speed
 
 
-
 def read_file(file):
     with open(file, "r") as f:
         lines = f.read().split("\n")
@@ -76,7 +75,7 @@ def write_file(file, list_of_signed_up):
 def process(file):
     book_scores, days_to_ship, list_of_libraries = read_file(file)
     # print(book_scores)
-    list_of_libraries.sort(key=lambda x: x.sort, reverse=True)
+    list_of_libraries.sort(key=lambda x: x.sort, reverse=False)
     list_of_signed_up = []
     global_set_books = set()
     for library in list_of_libraries:
@@ -100,22 +99,27 @@ def process(file):
                             break
                     library.books_to_scan.append(library.list_of_books[ind + x])
                     global_set_books.add(library.list_of_books[ind + x])
-                if ind < len(library.list_of_books) - 1:
+                if ind < len(library.list_of_books) - library.speed - 1:
                     ind += library.speed
                 else:
                     break
                 if len(library.books_to_scan) == len(library.list_of_books):
                     break
 
-        #print(library.list_of_books)
-        #print(f"Books to scan from {library.id}: {library.books_to_scan}")
+        # print(library.list_of_books)
+        # print(f"Books to scan from {library.id}: {library.books_to_scan}")
     write_file(file, list_of_signed_up)
 
 
-tic = time.perf_counter()
-# process(file_names[0])
-for file in file_names:
-    process(file)
+if __name__ == "__main__":
+    tic = time.perf_counter()
+    # process(file_names[0])
+    # for file in file_names:
+    #     process(file)
+    process("e_so_many_books.txt")
+    toc = time.perf_counter()
+    print(f"Finished in {toc-tic}")
+    from test import main as test
+    test("out2")
 
-toc = time.perf_counter()
-print(f"Finished in {toc-tic}")
+

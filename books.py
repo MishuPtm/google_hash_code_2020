@@ -22,12 +22,13 @@ class Library:
         return f"Nb of books: {self.nb_of_books} | " \
                f"Days to signup: {self.days_to_signup} | " \
                f"Books shipped per day: {self.speed} | " \
-               f"List of books: {self.list_of_books} | "
+               f"Library id: {self.id} | " \
+               f"List of books: {self.list_of_books} | " \
+               f""
 
     @property
     def sort(self):
         return self.days_to_signup / self.speed
-
 
 
 def read_file(file):
@@ -72,7 +73,7 @@ def write_file(file, list_of_signed_up):
 
 def process(file):
     book_scores, days_to_ship, list_of_libraries = read_file(file)
-    print(book_scores)
+    # print(book_scores)
     list_of_libraries.sort(key=lambda x: x.sort, reverse=False)
     list_of_signed_up = []
     for library in list_of_libraries:
@@ -82,9 +83,9 @@ def process(file):
             days_to_ship -= library.days_to_signup
                        # counts the books for this specific library
             for i in range(days_to_ship):
-                print(f"Days left {days_to_ship}, index is {ind}")
+                # print(f"Days left {days_to_ship}, index is {ind}")
                 for x in range(library.speed):
-                    print(f"{library.books_to_scan} and {library.list_of_books}")
+                    # print(f"{library.books_to_scan} and {library.list_of_books}")
                     if len(library.books_to_scan) == len(library.list_of_books):
                         break
 
@@ -95,11 +96,12 @@ def process(file):
                     break
                 if len(library.books_to_scan) == len(library.list_of_books):
                     break
-        print(library.list_of_books)
-        print(f"Books to scan from {library.id}: {library.books_to_scan}")
+        # print(library.list_of_books)
+        # print(f"Books to scan from {library.id}: {library.books_to_scan}")
     write_file(file, list_of_signed_up)
 
 
-for file in file_names:
-    process(file)
+if __name__ == "__main__":
+    for file in file_names:
+        process(file)
 
