@@ -48,7 +48,7 @@ class Library:
     @property
     def sort(self):
         return self.days_to_signup / self.speed
-
+        # return self.total_score / len(self.list_of_books)
 
 def read_file(file):
     with open(file, "r") as f:
