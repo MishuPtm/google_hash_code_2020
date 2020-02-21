@@ -16,6 +16,7 @@ class Library:
     days_left = 0
     global_books = set()
     list_of_libraries = []
+    list_of_signed_up = ()
 
     def __init__(self, nb_of_books, nb_of_days_for_signup, shipment_speed, list_of_books, id):
         self.id = id
@@ -23,6 +24,7 @@ class Library:
         self.days_to_signup = nb_of_days_for_signup
         self.speed = shipment_speed
         self.list_of_books = list_of_books
+        self.sorted_books = []
         self.books_to_scan = []
         self.total_score = 0
 
@@ -42,6 +44,41 @@ class Library:
         shipments_required = len(self.list_of_books) / self.speed
         return self.days_to_signup + shipments_required
 
+    def enroll(self, set_books):
+        Library.days_left -= self.days_to_signup
+        Library.global_books.union(set_books)
+        self.books_to_scan = list(set_books)
+
+    def max_reward(self):
+        if len(self.sorted_books) == 0:
+            self.sorted_books = self.get_sorted_books()
+        temp_set = set()
+        day_copy = Library.days_left
+        day_copy -= self.days_to_signup
+        ordered_books = self.sorted_books.copy()
+        for day in range(day_copy):
+            for shipment in range(self.speed):
+                if len(ordered_books) > 0:
+                    current_book = ordered_books.pop()
+                    while current_book in Library.global_books:
+                        if len(ordered_books) > 0:
+                            current_book = ordered_books.pop()
+                        else:
+                            break
+                    temp_set.add(current_book)
+                else:
+                    break
+            if len(ordered_books) == 0:
+                break
+
+
+        return self.calculate_reward(temp_set), temp_set
+
+    def calculate_reward(self, id_set):
+        total = 0
+        for book in id_set:
+            total += Library.book_scores[book]
+        return total
 
     def __str__(self):
         return f"Nb of books: {self.nb_of_books} | " \
@@ -49,7 +86,7 @@ class Library:
                f"Books shipped per day: {self.speed} | " \
                f"Library id: {self.id} | " \
                f"NB of books: {self.nb_of_books} | " \
-               f""
+               f"Sorted books: {self.sorted_books}"
 
     @property
     def sort(self):
@@ -57,6 +94,7 @@ class Library:
         # print(average)
         return (self.days_to_signup / self.speed) / self.total_score
         # return self.total_score
+
 
 def read_file(file):
     with open(file, "r") as f:
@@ -80,7 +118,6 @@ def read_file(file):
                 int_id = int(id)
                 library.total_score += int_id
                 library.list_of_books.append(int_id)
-
             list_of_library.append(library)
             index += 2
     print(f"{time.time()} {file} read")
@@ -129,12 +166,31 @@ def process(file):
                         break
                 if len(ordered_books) == 0:
                     break
-        if file == "b_read_on.txt":
-            print(f"Days left: {Library.days_left}\t"
-                  f"Current library {library_obj.days_to_signup}\t"
-                  f"Time required for entire library {library_obj.get_time_required()}")
-            pass
-    print(f"{time.time()} finished computing{file}")
+        # if file == "b_read_on.txt":
+            # print(f"Days left: {Library.days_left}\t"
+            #       f"Current library {library_obj.days_to_signup}\t"
+            #       f"Time required for entire library {library_obj.get_time_required()}")
+            # pass
+    # print(f"{time.time()} finished computing{file}")
+    write_file(file, list_of_signed_up)
+
+
+def brute_force(file):
+    Library.book_scores, Library.days_left, Library.list_of_libraries = read_file(file)
+    Library.list_of_libraries.sort(key=lambda c: c.sort, reverse=False)
+    Library.global_books = set()
+    list_of_signed_up = []
+    # print(Library.list_of_libraries[0])
+    for i in range(len(Library.list_of_libraries)):
+        individual_score = []
+        for library in Library.list_of_libraries:
+            individual_score.append(library.max_reward())
+        max_index = individual_score.index(max(individual_score))
+        best = Library.list_of_libraries[max_index]
+        best.enroll(individual_score[max_index][1])
+        list_of_signed_up.append(best)
+        Library.list_of_libraries.remove(best)
+
     write_file(file, list_of_signed_up)
 
 
@@ -142,11 +198,13 @@ if __name__ == "__main__":
     tic = time.perf_counter()
     from test import main as t
     from test import test_file
-    for file in file_names:
-        process(file)
+    # for file in file_names:
+    #     process(file)
     # process("test.txt")
     # test_file("test.out3")
-
+    a = "d_tough_choices.txt"
+    brute_force(a)
     toc = time.perf_counter()
     print(f"Finished in {toc-tic}")
-    t("out3")
+    test_file(a.replace("txt", "out3"))
+    # t("out3")
