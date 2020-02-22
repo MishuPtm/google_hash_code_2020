@@ -114,9 +114,9 @@ def process(file):
 if __name__ == "__main__":
     tic = time.perf_counter()
     # process(file_names[0])
-    # for file in file_names:
-    #     process(file)
-    process("e_so_many_books.txt")
+    for file in file_names:
+        process(file)
+    # process("e_so_many_books.txt")
     toc = time.perf_counter()
     print(f"Finished in {toc-tic}")
     from test import main as test
